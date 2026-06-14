@@ -39,7 +39,7 @@ const app = express();
 // console.log("hello")
 
 const BookStore=[
-    {id:1 ,name:"vishnu",age:19},
+    {id:1 ,name:"vishnu__",age:19},
     {id:2 ,name:"vardhan",age:19},
     {id:3 ,name:"Naidu",age:19}
 ]
@@ -55,7 +55,37 @@ app.post("/book/:username",(req,res)=>{
 })
 
 // app.use(express.json());
-// console.log("Hello")
+// console.log("Hello");
+
+// app.patch("/book",(req,res)=>{
+//     console.log(req.body);
+//     let Book=BookStore.find(info => info.id === req.body.id);
+//     console.log(Book)
+//     if(req.body.name)
+//     Book.name=req.body.name;
+
+//     if(req.body.age)
+//     Book.age=req.body.age;
+
+//     console.log(Book)
+//     console.log(BookStore)
+//     res.send("Patched data successfully")
+// })
+app.use(express.json())
+app.patch("/book/id",(req,res)=>{
+    let id=parseInt(req.query.id);
+    console.log(typeof id);
+    let index=BookStore.findIndex(info => info.id === id);
+    console.log(index)
+    if(index != -1)
+    BookStore.splice(index,1);
+    res.send(BookStore)
+})
+
+app.get("/book",(req,res)=>{
+    res.send(BookStore)
+})
+
 app.listen(400,()=>{
     console.log("Server is running at the port  number 40")
 })
