@@ -8,7 +8,7 @@ const Valid = async  (req ,  res ,next) =>{
         if(!token)
             throw new Error("Invalid token")
 
-        const payload = jwt.verify(req.cookies.token, 'vishnu@531');
+        const payload = jwt.verify(req.cookies.token, process.env.SECRET_KEY);
         req.payload = payload ;
         next();
 

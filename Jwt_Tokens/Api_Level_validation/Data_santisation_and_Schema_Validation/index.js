@@ -1,62 +1,26 @@
 const express = require("express");
-const bcrypt = require("bcrypt");
 
 const app = express();
 
 const main = require("./database");
-const User = require("./Models/User");
-const validUser = require("../Utils/Validation");
 const cookieParser = require("cookie-parser");
 const Valid = require("./Valid")
 const jwt = require('jsonwebtoken');
+const authRouter = require("./routes/auth")
+const userRouter = require("./routes/user")
+
+require('dotenv').config()
+
+// console.log(process.env)
 
 app.use(express.json());
 app.use(cookieParser())
 // Register User
-app.post("/register", async (req, res) => {
-    try {
-        // Validate request body
-        validUser(req);
 
-        // Hash password
-        req.body.password = await bcrypt.hash(req.body.password, 10);
 
-        // Save user
-        await User.create(req.body);
 
-        res.status(201).send("User registered successfully");
-    } catch (err) {
-        res.status(400).send(err.message);
-    }
-});
 
-app.post("/login" ,async (req ,res) =>{
-    try{
-        const doc = await User.findById(req.body._id) ;
-        const pass = await bcrypt.compare(req. body.password , doc.password)
-        if((req.body.emailID != doc.emailID) ||(!pass))
-            throw  new  Error("Invaid credentials")
-        //TO generate he JWT token 
-        const token = jwt.sign({ name : doc.fname , emailID: doc.emailID }, 'vishnu@531' , {expiresIn : 10});
-        res.cookie("token" , token)
-        res.send("Login  successful")
-    }catch(err){
-        res.send(err.message)
-    }
-})
 
-// Get all users
-app.get("/info", Valid ,async (req, res) => {
-    try {
-        //If the token recived at this server is true then it will return the payload other wise it will throw an error that will handle at the catch block or we  can say it as if eror occurs then it moves to the catch block
-        const payload = req.payload ; 
-        console.log(payload)
-        const users = await User.findOne(payload.emailID)        
-        res.send(users);    
-    } catch (err) {
-        res.status(500).send(err.message);
-    }
-});
 
 // // Get user by ID
 // app.get("/info/:id", async (req, res) => {
@@ -73,42 +37,14 @@ app.get("/info", Valid ,async (req, res) => {
 //     }
 // });
 
-// Delete user
-app.delete("/info/:id", Valid , async (req, res) => {
-    try {
-        const user = await User.findByIdAndDelete(req.params.id);
-
-        if (!user) {
-            return res.status(404).send("User not found");
-        }
-
-        res.send("User deleted successfully");
-    } catch (err) {
-        res.status(500).send(err.message);
-    }
-});
-
-// Update user
-app.put("/info", Valid ,async (req, res) => {
-    try {
-        const { _id, ...update } = req.body;
-
-        await User.findByIdAndUpdate(_id, update, {
-            runValidators: true,
-            new: true
-        });
-
-        res.send("User updated successfully");
-    } catch (err) {
-        res.status(500).send(err.message);
-    }
-});
+app.use("/auth" ,authRouter) ;
+app.use("/user" , userRouter) ;
 
 main()
     .then(() => {
         console.log("Connected to DB");
 
-        app.listen(3000, () => {
+        app.listen(process.env.PORT_NO, () => {
             console.log("Listening on port 3000");
         });
     })
