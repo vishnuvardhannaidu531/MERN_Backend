@@ -1,3 +1,5 @@
+const validator = require("validator");
+
 function validUser(req) {
     const { fname, emailID, password } = req.body;
         
